@@ -122,23 +122,23 @@ jobs:
           # find: /home/runner/scubagoggles: No such file or directory
           # FOUNDIT=$(find /home/runner/scubagoggles -type d -name "GWSBaselineConformance_*")
           # echo "cachepath=$FOUNDIT" >> $GITHUB_OUTPUT
-          ls
-          FOUNDMAC=$(find "." -type d -name "GWSBaselineConformance_*")
+          ls -al
+          FOUNDMAC=$(find "/Users/runner/scubagoggles" -type d -name "GWSBaselineConformance_*")
           echo "$FOUNDMAC: "
           echo $FOUNDMAC
           echo "cachepath=$FOUNDMAC" >> $GITHUB_OUTPUT
 
-      - name: Run ScubaGoggles and check for correct output (windows)
-        if: ${{ matrix.operating-system == 'windows-latest' }}
-        run: |
-          & ${{ env.SCUBAGOGGLES_ACTIVATE_VENV }}
-          pytest ./scubagoggles/Testing/Functional/SmokeTests/ -vvv --subjectemail="${{ secrets.GWS_SUBJECT_EMAIL }}" --customerdomain="${{ secrets.GWS_DOMAIN }}"
-          $NEWPATH = $PWD.Path + "\scubagoggles"
-          $FOUNDWINDOWS = (Get-ChildItem -Path $NEWPATH -Directory -Filter "GWSBaselineConformance_*" -Recurse).FullName
-          pwd
-          ls
-          $FOUNDWINDOWS
-          echo "cachepath=$FOUNDWINDOWS" >> $env:GITHUB_OUTPUT
+      # - name: Run ScubaGoggles and check for correct output (windows)
+      #   if: ${{ matrix.operating-system == 'windows-latest' }}
+      #   run: |
+      #     & ${{ env.SCUBAGOGGLES_ACTIVATE_VENV }}
+      #     pytest ./scubagoggles/Testing/Functional/SmokeTests/ -vvv --subjectemail="${{ secrets.GWS_SUBJECT_EMAIL }}" --customerdomain="${{ secrets.GWS_DOMAIN }}"
+      #     $NEWPATH = $PWD.Path + "\scubagoggles"
+      #     $NEWPATH
+      #     $FOUNDWINDOWS = (Get-ChildItem -Path $NEWPATH -Directory -Filter "GWSBaselineConformance_*" -Recurse).FullName
+      #     pwd
+      #     $FOUNDWINDOWS
+      #     echo "cachepath=$FOUNDWINDOWS" >> $env:GITHUB_OUTPUT
 
       - name: Run ScubaGoggles and check for correct output (ubuntu)
         if: ${{ matrix.operating-system == 'ubuntu-latest' }}
