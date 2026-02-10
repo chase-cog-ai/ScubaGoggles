@@ -71,8 +71,8 @@ jobs:
     runs-on: ${{ matrix.operating-system }}
     outputs:
       linux-path: ${{ steps.linux-path.outputs.cachepath }}
-      macpath: ${{ steps.macpath.outputs.cachepath }}
-      windowspath: ${{ steps.windowspath.outputs.cachepath }}
+      mac-path: ${{ steps.mac-path.outputs.cachepath }}
+      windows-path: ${{ steps.windows-path.outputs.cachepath }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -117,7 +117,7 @@ jobs:
 
       - name: Run ScubaGoggles and check for correct output (macOs)
         if: ${{ matrix.operating-system == 'macos-latest'}}
-        id: macpath
+        id: mac-path
         run: |
           ${{ env.SCUBAGOGGLES_ACTIVATE_VENV }}
           pytest ./scubagoggles/Testing/Functional/SmokeTests/ -vvv --subjectemail="${{ secrets.GWS_SUBJECT_EMAIL }}" --customerdomain="${{ secrets.GWS_DOMAIN }}"
@@ -130,14 +130,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /Users/runner/scubagoggles
-          key: ${{ runner.os }}-baseline-${{ steps.macpath.outputs.cachepath }}
+          key: ${{ runner.os }}-baseline-${{ steps.mac-path.outputs.cachepath }}
 
       - name: Run ScubaGoggles and check for correct output (windows)
         if: ${{ matrix.operating-system == 'windows-latest' }}
         run: |
           & ${{ env.SCUBAGOGGLES_ACTIVATE_VENV }}
           pytest ./scubagoggles/Testing/Functional/SmokeTests/ -vvv --subjectemail="${{ secrets.GWS_SUBJECT_EMAIL }}" --customerdomain="${{ secrets.GWS_DOMAIN }}"
-          $NEWPATH = $PWD.Path + "\scubagoggles"
+          $NEWPATH = $PWD.Path
           $NEWPATH
           $FOUNDWINDOWS = (Get-ChildItem -Path $NEWPATH -Directory -Filter "GWSBaselineConformance_*" -Recurse).FullName
           pwd
@@ -149,7 +149,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: D:\a\ScubaGoggles\Scubagoggles
-          key: ${{ runner.os }}-baseline-${{ steps.linux-path.outputs.cachepath }}
+          key: ${{ runner.os }}-baseline-${{ steps.windows-path.outputs.cachepath }}
 
       - name: Run ScubaGoggles and check for correct output (ubuntu)
         if: ${{ matrix.operating-system == 'ubuntu-latest' }}
