@@ -138,9 +138,11 @@ jobs:
           & ${{ env.SCUBAGOGGLES_ACTIVATE_VENV }}
           pytest ./scubagoggles/Testing/Functional/SmokeTests/ -vvv --subjectemail="${{ secrets.GWS_SUBJECT_EMAIL }}" --customerdomain="${{ secrets.GWS_DOMAIN }}"
           $NEWPATH = $PWD.Path
-          $NEWPATH
-          $FOUNDWINDOWS = (Get-ChildItem -Path $NEWPATH -Directory -Filter "GWSBaselineConformance_*" -Recurse).FullName
-          pwd
+          # $NEWPATH
+          # D:\a\ScubaGoggles\ScubaGoggles
+          $CURRENT_DIR = (Get-Location).Path
+          $CURRENT_DIR
+          $FOUNDWINDOWS = (Get-ChildItem -Path $GITHUB_WORKSPACE -Directory -Filter "GWSBaselineConformance_*" -Recurse).FullName
           $FOUNDWINDOWS
           echo "cachepath=$FOUNDWINDOWS" >> $env:GITHUB_OUTPUT
 
