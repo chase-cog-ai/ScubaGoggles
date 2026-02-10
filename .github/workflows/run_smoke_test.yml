@@ -70,8 +70,9 @@ jobs:
         python-version: ${{ fromJSON(needs.configuration.outputs.python-version) }}
     runs-on: ${{ matrix.operating-system }}
     outputs:
-      baseline-path: ${{ steps.baseline-path.outputs.cachepath }}
+      linux-path: ${{ steps.linux-path.outputs.cachepath }}
       macpath: ${{ steps.macpath.outputs.cachepath }}
+      windowspath: ${{ steps.windowspath.outputs.cachepath }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -124,21 +125,35 @@ jobs:
           echo $FOUNDMAC
           echo "cachepath=$FOUNDMAC" >> $GITHUB_OUTPUT
 
-      # - name: Run ScubaGoggles and check for correct output (windows)
-      #   if: ${{ matrix.operating-system == 'windows-latest' }}
-      #   run: |
-      #     & ${{ env.SCUBAGOGGLES_ACTIVATE_VENV }}
-      #     pytest ./scubagoggles/Testing/Functional/SmokeTests/ -vvv --subjectemail="${{ secrets.GWS_SUBJECT_EMAIL }}" --customerdomain="${{ secrets.GWS_DOMAIN }}"
-      #     $NEWPATH = $PWD.Path + "\scubagoggles"
-      #     $NEWPATH
-      #     $FOUNDWINDOWS = (Get-ChildItem -Path $NEWPATH -Directory -Filter "GWSBaselineConformance_*" -Recurse).FullName
-      #     pwd
-      #     $FOUNDWINDOWS
-      #     echo "cachepath=$FOUNDWINDOWS" >> $env:GITHUB_OUTPUT
+      - name: Cache the output directory (macOS)
+        if: ${{ matrix.operating-system == 'macos-latest'}}
+        uses: actions/cache@v4
+        with:
+          path: /Users/runner/scubagoggles
+          key: ${{ runner.os }}-baseline-${{ steps.macpath.outputs.cachepath }}
+
+      - name: Run ScubaGoggles and check for correct output (windows)
+        if: ${{ matrix.operating-system == 'windows-latest' }}
+        run: |
+          & ${{ env.SCUBAGOGGLES_ACTIVATE_VENV }}
+          pytest ./scubagoggles/Testing/Functional/SmokeTests/ -vvv --subjectemail="${{ secrets.GWS_SUBJECT_EMAIL }}" --customerdomain="${{ secrets.GWS_DOMAIN }}"
+          $NEWPATH = $PWD.Path + "\scubagoggles"
+          $NEWPATH
+          $FOUNDWINDOWS = (Get-ChildItem -Path $NEWPATH -Directory -Filter "GWSBaselineConformance_*" -Recurse).FullName
+          pwd
+          $FOUNDWINDOWS
+          echo "cachepath=$FOUNDWINDOWS" >> $env:GITHUB_OUTPUT
+
+      - name: Cache the output directory (windows-latest))
+        if: ${{ matrix.operating-system == 'windows-latest' }}
+        uses: actions/cache@v4
+        with:
+          path: D:\a\ScubaGoggles\Scubagoggles
+          key: ${{ runner.os }}-baseline-${{ steps.linux-path.outputs.cachepath }}
 
       - name: Run ScubaGoggles and check for correct output (ubuntu)
         if: ${{ matrix.operating-system == 'ubuntu-latest' }}
-        id: baseline-path
+        id: linux-path
         run: |
           ${{ env.SCUBAGOGGLES_ACTIVATE_VENV }}
           pytest ./scubagoggles/Testing/Functional/SmokeTests/ -vvv --subjectemail="${{ secrets.GWS_SUBJECT_EMAIL }}" --customerdomain="${{ secrets.GWS_DOMAIN }}"
@@ -146,19 +161,12 @@ jobs:
           echo $FOUNDLINUX
           echo "cachepath=$FOUNDLINUX" >> $GITHUB_OUTPUT
 
-      - name: Cache the output directory (macOS)
-        if: ${{ matrix.operating-system == 'macos-latest'}}
-        uses: actions/cache@v4
-        with:
-          path: /home/runner/scubagoggles
-          key: ${{ runner.os }}-baseline-${{ steps.macpath.outputs.cachepath }}
-
       - name: Cache the output directory (ubuntu-latest))
         if: ${{ matrix.operating-system == 'ubuntu-latest' }}
         uses: actions/cache@v4
         with:
-          path: /Users/runner/scubagoggles
-          key: ${{ runner.os }}-baseline-${{ steps.baseline-path.outputs.cachepath }}
+          path: /home/runner/scubagoggles
+          key: ${{ runner.os }}-baseline-${{ steps.linux-path.outputs.cachepath }}
 
   lhci:
     runs-on: ubuntu-latest
@@ -167,21 +175,12 @@ jobs:
       contents: write
     if: ${{ always() }}
     steps:
-      - name: Restore cached baseline folder (macos-latest)
-        if: ${{ matrix.operating-system == 'macos-latest'}}
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            /Users/runner/scubagoggles
-          key: ${{ runner.os }}-baseline-${{ steps.baseline-path.outputs.cachepath }}
-
       - name: Restore cached baseline folder (ubuntu-latest)
-        if: ${{ matrix.operating-system == 'macos-latest'}}
         uses: actions/cache/restore@v4
         with:
           path: |
             /home/runner/scubagoggles
-          key: ${{ runner.os }}-baseline-${{ steps.baseline-path.outputs.cachepath }}
+          key: ${{ runner.os }}-baseline-${{ steps.linux-path.outputs.cachepath }}
 
       - name: Use Node.js 20.x
         uses: actions/setup-node@v3
