@@ -142,7 +142,7 @@ jobs:
           # D:\a\ScubaGoggles\ScubaGoggles
           $CURRENT_DIR = (Get-Location).Path
           $CURRENT_DIR
-          $FOUNDWINDOWS = (Get-ChildItem -Path $GITHUB_WORKSPACE -Directory -Filter "GWSBaselineConformance_*" -Recurse).FullName
+          $FOUNDWINDOWS = (Get-ChildItem -Path $CURRENT_DIR -Directory -Filter "GWSBaselineConformance_*" -Recurse).FullName
           $FOUNDWINDOWS
           echo "cachepath=$FOUNDWINDOWS" >> $env:GITHUB_OUTPUT
 
